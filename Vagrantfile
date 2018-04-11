@@ -70,6 +70,7 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: <<-SHELL
      sudo apt-get update
      git clone https://github.com/michael-hahn/cs262.git
-     
+     sudo apt install -y python2.7 python-pip
+     pip install --upgrade python-iptables
   SHELL
 end

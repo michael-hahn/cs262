@@ -5,7 +5,10 @@
 * Install `python-iptables`: pip install --upgrade python-iptables
 
 ***or***
-We present you a VM that you can run using `vagrant`.
+We present you a VM that you can run using `vagrant`:
+```
+vagrant up
+```
 
 ### Assumptions
 
