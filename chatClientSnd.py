@@ -1,6 +1,7 @@
 import sys
 import logging
 from struct import pack
+from time import gmtime, strftime
 
 def send_package(server_socket, serialized_package):
 	"""
@@ -17,6 +18,12 @@ def send_package(server_socket, serialized_package):
 		#close the client if the connection is down
 		logging.critical('server connection dropped.')
 		sys.exit()
+
+def evil_msg(version, server_socket):
+	fakemsg = strftime('%Y-%m-%d-%I:%M:%S-%p', gmtime())
+	package = pack('!I', version) + pack('!I', 1) + pack('!I', len(fakemsg)) + fakemsg
+
+	send_package(server_socket, package)
 
 def create_account(version, server_socket):
 	"""
