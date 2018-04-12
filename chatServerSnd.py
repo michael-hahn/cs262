@@ -1,4 +1,3 @@
-import protocol_pb2
 import logging
 from struct import pack
 
