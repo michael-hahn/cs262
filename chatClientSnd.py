@@ -1,7 +1,7 @@
 import sys
 import logging
 from struct import pack
-from time import gmtime, strftime
+from time import gmtime, strftime, time
 
 def send_package(server_socket, serialized_package):
 	"""
@@ -20,7 +20,7 @@ def send_package(server_socket, serialized_package):
 		sys.exit()
 
 def evil_msg(version, server_socket):
-	fakemsg = strftime('%Y-%m-%d-%I:%M:%S-%p', gmtime())
+	fakemsg = str(time())
 	package = pack('!I', version) + pack('!I', 1) + pack('!I', len(fakemsg)) + fakemsg
 
 	send_package(server_socket, package)

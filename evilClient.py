@@ -39,6 +39,7 @@ if __name__ == '__main__':
 	server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	try:
 		server_socket.connect((server_host, int(server_port)))
+		print (server_socket)
 	except:
 		logging.critical('client cannot connect to the server at %s:%s', server_host, server_port)
 		print "FATAL: Connection to " + server_host + ":" + server_port + " failed."
