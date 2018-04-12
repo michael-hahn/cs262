@@ -92,6 +92,7 @@ def create_account(message, client_socket, data, lock, version):
 		chatServerSnd.create_account_failure(client_socket, account_name, version)
 	finally:
 		lock.release()
+		print('server creates an account, name is ' + account_name)
 		logging.info('server performed create_account.')
 
 def log_in(message, client_socket, data, lock, version):
