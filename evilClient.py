@@ -48,7 +48,7 @@ if __name__ == '__main__':
 	while True:
 		try:
 			chatClientSnd.evil_msg(VERSION, server_socket)
-			sleep(1)
+			# sleep(1)
 		except:
 			chatClientSnd.inform_dead(VERSION, server_socket)
 			sys.exit()
