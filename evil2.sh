@@ -10,6 +10,6 @@ fi
 
 for ((i=1; i<=Num; ++i))
 do
-	python evilClient.py localhost 8080 &
+	python evilClient.py $2 8080 &
 done
 
