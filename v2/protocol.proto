@@ -5,6 +5,8 @@ message Server2Client {
 	string version = 1;
 	int32 opcode = 2;
 	string msg = 3;
+	bool flag = 4; // if server sends a puzzle, flag will be set true; otherwise flag is false
+	string puzzle = 5; // the puzzle sent by the server to the client for authentication
 }
 
 /* Client2Server is the message that a client sends to a server */
@@ -14,4 +16,6 @@ message Client2Server {
 	string sender = 3;
 	string receiver = 4;
 	string msg = 5;
+	bool flag = 6; // unused for now
+	string result = 7; // the decoded result calculated by the client
 }

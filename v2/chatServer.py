@@ -8,7 +8,33 @@ import chatServerRcv
 
 import protocol_pb2
 
+class socket_valid:
+	def __init__(self):
+		self.wait = 0
+		self.resend = 0
+	
+	def addwait():
+		self.wait = self.wait + 1
+
+	def addresend():
+		self.resend = self.resend + 1
+
+	def waitclear():
+		self.wait = 0
+
+	def resentclear():
+		self.resend = 0
+
+	def getwait():
+		return self.wait
+
+	def getresend():
+		return self.resend
+
+
 VERSION = '0.1'
+MAX_WAIT = 1
+MAX_RESEND = 3
 
 """
 Operation codes found in the packages from the client to the server.
@@ -45,11 +71,19 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
 		client_addr = self.client_address
 		logging.info('client connected from: %s', client_addr)
 
-		too_many_attempts = 0	# only allow limited mistakes from the client
-
 		while True:
 			try:
 				self.message = self.request.recv(1024)
+
+				if client_addr not in self.server.whitelist:
+					self.server.whitelist[client_addr] = socket_counter()
+				else:
+					socket_cnt = self.server.whitelist[client_addr]
+					socket_cnt.addresend()
+					socket_cnt.addwait()
+					if socket_cnt.getresend >= MAX_RESEND:
+						# 
+
 				if len(self.message) == 0:
 					raise KeyboardInterrupt
 			# except:
@@ -103,6 +137,7 @@ if __name__ == '__main__':
 	
 	server = ThreadedTCPServer((HOST, PORT), ThreadedTCPRequestHandler)
 	server.data = {}
+	server.whitelist = {} # good clients are put into server's whitelist dictionary
 	server.lock = threading.Lock()
 	hostIP = socket.gethostbyname(socket.gethostname())
 	print hostIP
