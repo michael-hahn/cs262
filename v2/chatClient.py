@@ -52,7 +52,8 @@ OPCODES = {
 	# operation code for packages sent from the server to report successful direct sent of a message to another user
 	17: chatClientRcv.direct_send,
 	# operation code for packages sent from the server to report failure in listing the requested accounts
-	18: chatClientRcv.list_account_failure}
+	18: chatClientRcv.list_account_failure,
+	20: chatClientRcv.puzzle_get}
 
 
 def client_input():

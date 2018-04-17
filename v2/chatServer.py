@@ -5,36 +5,38 @@ import SocketServer
 import threading
 import thread
 import chatServerRcv
+import chatServerSnd
 
 import protocol_pb2
 
 class socket_valid:
 	def __init__(self):
-		self.wait = 0
 		self.resend = 0
-	
-	def addwait():
-		self.wait = self.wait + 1
+		self.puzzle = ""
+		self.flag = 0
 
 	def addresend():
 		self.resend = self.resend + 1
 
-	def waitclear():
-		self.wait = 0
-
-	def resentclear():
+	def resendclear():
 		self.resend = 0
-
-	def getwait():
-		return self.wait
 
 	def getresend():
 		return self.resend
 
+	def resetflag():
+		self.flag = 0
+
+	def setflag():
+		self.flag = 1
+
+	def getflag():
+		return self.flag
+
+
 
 VERSION = '0.1'
-MAX_WAIT = 1
-MAX_RESEND = 3
+MAX_RESEND = 10
 
 """
 Operation codes found in the packages from the client to the server.
@@ -53,7 +55,8 @@ OPCODES = {
 	# operation code in packages sent for a list-all-accounts request from the client
 	6: chatServerRcv.list_account,
 	# operation code in packages sent for a log-out request from the client
-	7: chatServerRcv.quit}
+	7: chatServerRcv.quit	
+	}
 
 class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
 	"""
@@ -71,33 +74,88 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
 		client_addr = self.client_address
 		logging.info('client connected from: %s', client_addr)
 
+		blackflag = 1
+		# send first puzzle to validate
+		#########################
+		puzzle = '0' #### should be a function by Dimitris
+		##### Send package to client.
+		chatServerSnd.puzzle_send(self.request, puzzle, VERSION)
+		#########################
+
+		# # receive package
+		# self.message = self.request.recv(1024)
+		# if len(self.message) == 0:
+		# 	print("Check The Issue Here.")
+		# 	raise KeyboardInterrupt
+
+		# package = protocol_pb2.Client2Server()
+		# package.ParseFromString(self.message)
+
+		# # check the package see if the puzzle is solved.
+		# if package.opcode != 9:
+		# 	# blacklist
+		# 	###############################
+		# 	blackflag = 0
+		# else:
+		# 	# check the result, res is boolean
+		# 	res = chatServerRcv.puzzle_check(package, self.request, self.server.data, self.server.lock, VERSION, puzzle)
+		# 	if res:
+		# 		# whitelist
+		# 		self.server.whitelist[client_addr] = socket_counter(puzzle)
+		# 	else:
+		# 		#add client address to blacklist
+		# 		#################################
+		# 		blackflag = 0
+
+		puzzleflag = 0 # if 1 then the server should send the puzzle again, 0 then not
+		# first validation is done
 		while True:
 			try:
 				self.message = self.request.recv(1024)
-
-				if client_addr not in self.server.whitelist:
-					self.server.whitelist[client_addr] = socket_counter()
-				else:
-					socket_cnt = self.server.whitelist[client_addr]
-					socket_cnt.addresend()
-					socket_cnt.addwait()
-					if socket_cnt.getresend >= MAX_RESEND:
-						# 
-
 				if len(self.message) == 0:
 					raise KeyboardInterrupt
-			# except:
-			# 	logging.critical('client connection dropped.')
 
 				package = protocol_pb2.Client2Server()
 				package.ParseFromString(self.message)	# parsing the package using Protocol Buffer
 
+				if client_addr not in self.server.whitelist:
+					self.server.whitelist[client_addr] = socket_valid()
+				socket_obj = self.server.whitelist[client_addr]
+				
+				socket_obj.addresend()
+
+				socket_obj.addwait()
+
 				if package.opcode == 0:	   # in some case an empty package may be sent
 					continue
 
+				if socket_obj.getresend() > MAX_RESEND:
+					puzzleflag = 1 # now we need to send a puzzle with the response to the client later
+					socket_obj.resetflag() # restart every counter
+
+
+				# socket_cnt.addresend()
+				# socket_cnt.addwait()
+				# if socket_cnt.getresend() > MAX_RESEND:
+				# 	puzzleflag = 1
+				# 	socket_cnt.resetflag()
+				# if socket_cnt.getwait() >= MAX_WAIT && socket_cnt.getflag() == 0:
+				# 	#add client address to blacklist
+				# 	#################################
+				# 	# delete client address from whitelist
+				# 	del self.server.whitelist[client_addr]
+				# 	break
+
+			# except:
+			# 	logging.critical('client connection dropped.')
+
+				if puzzleflag == 1:
+					#############################################
+					puzzle = '1' # need function to generate puzzle
+					#############################################
 				if package.version == VERSION:
 					try:
-						OPCODES[package.opcode](package, self.request, self.server.data, self.server.lock, VERSION)
+						OPCODES[package.opcode](package, self.request, self.server.data, self.server.lock, VERSION, puzzleflag, puzzle, socket_obj) # message that server sends to client 
 					except:
 						logging.critical('unexpected fatal error occurred. Check server request handler.')
 				else:

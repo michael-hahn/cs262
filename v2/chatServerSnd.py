@@ -15,6 +15,17 @@ def send_package(client_socket, serialized_package):
 	except:
 		logging.critical('client connection dropped in send_package.')
 
+def puzzle_send(client_socket, puzzle, version):
+	logging.info('server sends the puzzle to client.')
+
+	package = protocol_pb2.Server2Client()
+	package.version = version
+	package.opcode = 20
+	package.puzzle = puzzle
+
+	send_package(client_socket, package.SerializeToString())
+
+
 def create_account_success(client_socket, account_name, version):
 	"""
 	Sends a package to the client with a message to report that a new account was created successfully.
