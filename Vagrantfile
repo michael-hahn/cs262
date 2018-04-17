@@ -72,5 +72,16 @@ Vagrant.configure("2") do |config|
      git clone https://github.com/michael-hahn/cs262.git
      sudo apt install -y python2.7 python-pip
      pip install --upgrade python-iptables
+     cd ~
+     sudo apt-get install -y git autoconf automake libtool curl make g++ unzip
+     sudo git clone https://github.com/google/protobuf.git
+     cd protobuf/
+     autoreconf —-install
+     ./configure
+     make
+     sudo make install
+     sudo ldconfig
+     cd ~
+     pip install protobuf==3.5.1
   SHELL
 end
