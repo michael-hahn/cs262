@@ -7,7 +7,7 @@ import select
 from time import gmtime, strftime, sleep
 from struct import unpack
 
-VERSION = 1
+VERSION = '0.1'
 
 if __name__ == '__main__':
 	"""
