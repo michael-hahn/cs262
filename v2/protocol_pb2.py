@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='protocol.proto',
   package='',
   syntax='proto3',
-  serialized_pb=_b('\n\x0eprotocol.proto\"[\n\rServer2Client\x12\x0f\n\x07version\x18\x01 \x01(\t\x12\x0e\n\x06opcode\x18\x02 \x01(\x05\x12\x0b\n\x03msg\x18\x03 \x01(\t\x12\x0c\n\x04\x66lag\x18\x04 \x01(\x08\x12\x0e\n\x06puzzle\x18\x05 \x01(\t\"}\n\rClient2Server\x12\x0f\n\x07version\x18\x01 \x01(\t\x12\x0e\n\x06opcode\x18\x02 \x01(\x05\x12\x0e\n\x06sender\x18\x03 \x01(\t\x12\x10\n\x08receiver\x18\x04 \x01(\t\x12\x0b\n\x03msg\x18\x05 \x01(\t\x12\x0c\n\x04\x66lag\x18\x06 \x01(\x08\x12\x0e\n\x06result\x18\x07 \x01(\tb\x06proto3')
+  serialized_pb=_b('\n\x0eprotocol.proto\"y\n\rServer2Client\x12\x0f\n\x07version\x18\x01 \x01(\t\x12\x0e\n\x06opcode\x18\x02 \x01(\x05\x12\x0b\n\x03msg\x18\x03 \x01(\t\x12\x14\n\x0cpuzzle_level\x18\x04 \x01(\x05\x12\x0e\n\x06puzzle\x18\x05 \x01(\t\x12\x14\n\x0cpuzzle_exist\x18\x06 \x01(\x08\"_\n\rClient2Server\x12\x0f\n\x07version\x18\x01 \x01(\t\x12\x0e\n\x06opcode\x18\x02 \x01(\x05\x12\x0e\n\x06sender\x18\x03 \x01(\t\x12\x10\n\x08receiver\x18\x04 \x01(\t\x12\x0b\n\x03msg\x18\x05 \x01(\tb\x06proto3')
 )
 
 
@@ -54,9 +54,9 @@ _SERVER2CLIENT = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='flag', full_name='Server2Client.flag', index=3,
-      number=4, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
+      name='puzzle_level', full_name='Server2Client.puzzle_level', index=3,
+      number=4, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
@@ -64,6 +64,13 @@ _SERVER2CLIENT = _descriptor.Descriptor(
       name='puzzle', full_name='Server2Client.puzzle', index=4,
       number=5, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='puzzle_exist', full_name='Server2Client.puzzle_exist', index=5,
+      number=6, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
@@ -80,7 +87,7 @@ _SERVER2CLIENT = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=18,
-  serialized_end=109,
+  serialized_end=139,
 )
 
 
@@ -126,20 +133,6 @@ _CLIENT2SERVER = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='flag', full_name='Client2Server.flag', index=5,
-      number=6, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='result', full_name='Client2Server.result', index=6,
-      number=7, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -152,7 +145,7 @@ _CLIENT2SERVER = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=111,
+  serialized_start=141,
   serialized_end=236,
 )
 

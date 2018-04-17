@@ -6,8 +6,11 @@ import chatClientSnd
 import chatClientRcv
 import select
 from time import gmtime, strftime
+import puzzle
 
 VERSION = '0.1'
+RESEND_CODE = 22
+CREATE_CODE = 23
 
 """
 Operation codes found in the packages from the server to the client.
@@ -52,8 +55,9 @@ OPCODES = {
 	# operation code for packages sent from the server to report successful direct sent of a message to another user
 	17: chatClientRcv.direct_send,
 	# operation code for packages sent from the server to report failure in listing the requested accounts
-	18: chatClientRcv.list_account_failure,
-	20: chatClientRcv.puzzle_get}
+	18: chatClientRcv.list_account_failure
+	# if 20: solve the puzzle
+	}
 
 
 def client_input():
@@ -115,6 +119,7 @@ def get_response(server_socket):
 	"""
 	while True:
 		try:
+			# import pdb; pdb.set_trace()
 			buf = server_socket.recv( 1024 )
 		except:
 			print 'Lost connection with the server.'
@@ -126,12 +131,26 @@ def get_response(server_socket):
 			package.ParseFromString(buf)
 
 			if package.version == VERSION:
-				try:
-					OPCODES[package.opcode](server_socket, package.msg)
+				if package.opcode == 20:
+					print ("SOLVE PUZZLE NOW...")
+					puzzle.solve_puzzle(package.puzzle_level, package.puzzle)
+					print ("SOLVED...")
+					# import pdb; pdb.set_trace()
+					if package.puzzle_level == CREATE_CODE:
+						### response something here
+						chatClientSnd.create_approved(VERSION, server_socket)
 					return
-				except:
-					logging.critical('unexpected fatal error occurred. Check client get_response.')
-					sys.exit()
+				else:
+					if package.puzzle_exist:
+						print ("SOLVE PUZZLE NOW...")
+						puzzle.solve_puzzle(package.puzzle_level, package.puzzle)
+						print ("SOLVED...")
+					try:
+						OPCODES[package.opcode](server_socket, package.msg)
+						return
+					except:
+						logging.critical('unexpected fatal error occurred. Check client get_response.')
+						sys.exit()
 			else:
 				logging.critical('server uses a different version.')
 				sys.exit()

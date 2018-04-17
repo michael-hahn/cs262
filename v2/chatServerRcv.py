@@ -3,6 +3,7 @@ import threading
 import logging
 import chatServerSnd
 import fnmatch
+import puzzle
 
 class Client:
 	"""
@@ -52,7 +53,7 @@ class Client:
 		"""Return the socket assigned to the client."""
 		return self.socket
 
-def create_account(package, client_socket, data, lock, version):
+def create_account(package, client_socket, data, lock, version, puzzleflag, new_puzzle, RESEND_CODE, CREATE_CODE):
 	""" 
 	Handles a message from a client to create a new account.
 
@@ -72,7 +73,16 @@ def create_account(package, client_socket, data, lock, version):
 		Nothing
 	
 	"""
+	print("start create_account")
 	account_name = package.msg    # the msg in the package contains the name of the new account
+
+	# import pdb; pdb.set_trace()
+	new_puzzle = puzzle.create_puzzle(CREATE_CODE) 
+	chatServerSnd.puzzle_send(client_socket, new_puzzle, CREATE_CODE, version)
+
+	msg_buf = client_socket.recv(1024) #server gets something back because the client solves the puzzle
+	# puzzle_res = protocol_pb2.Client2Server()
+	# puzzle_res.ParseFromString(msg_buf)
 
 	lock.acquire()
 
@@ -90,9 +100,10 @@ def create_account(package, client_socket, data, lock, version):
 		chatServerSnd.create_account_failure(client_socket, account_name, version)
 	finally:
 		lock.release()
+		print("end create_account")
 		logging.info('server performed create_account.')
 
-def log_in(package, client_socket, data, lock, version):
+def log_in(package, client_socket, data, lock, version, puzzleflag, new_puzzle, RESEND_CODE, CREATE_CODE):
 	"""
 	Handles a message from a client to log in into an account.
 
@@ -123,7 +134,7 @@ def log_in(package, client_socket, data, lock, version):
 				client_entry = data[acc]
 				if client_socket == client_entry.get_socket():
 					if acc == account_name:
-						chatServerSnd.log_in_already(client_socket, account_name, version)
+						chatServerSnd.log_in_already(client_socket, account_name, version, puzzleflag, new_puzzle, RESEND_CODE, CREATE_CODE)
 						logging.info('account has logged in already.')
 						error = True
 						break
@@ -133,27 +144,27 @@ def log_in(package, client_socket, data, lock, version):
 
 						new_client = data[account_name]
 						new_client.set_socket(client_socket)
-						chatServerSnd.log_in_other(client_socket, acc, version)
+						chatServerSnd.log_in_other(client_socket, acc, version, puzzleflag, new_puzzle, RESEND_CODE, CREATE_CODE)
 						logging.info('%s has logged in here. Forced logged out', acc)
 						error = True
 						break
 			if not error:
 				client_entry = data[account_name]
 				client_entry.set_socket(client_socket)
-				chatServerSnd.log_in_success(client_socket, account_name, version)
+				chatServerSnd.log_in_success(client_socket, account_name, version, puzzleflag, new_puzzle, RESEND_CODE, CREATE_CODE)
 				logging.info('account is successfully logged in.')
 		else:
-			chatServerSnd.log_in_failure(client_socket, account_name, version)
+			chatServerSnd.log_in_failure(client_socket, account_name, version, puzzleflag, new_puzzle, RESEND_CODE, CREATE_CODE)
 			logging.info('the account cannot be logged in as it does not exist. Create an account first.')
 			
 	except:
 		logging.warning('exception occurred when server runs log_in.')
-		chatServerSnd.log_in_failure(client_socket, account_name, version)
+		chatServerSnd.log_in_failure(client_socket, account_name, version, puzzleflag, new_puzzle, RESEND_CODE, CREATE_CODE)
 	finally:
 		lock.release()
 		logging.info('server performed log_in.')
 
-def send_message(package, client_socket, data, lock, version):
+def send_message(package, client_socket, data, lock, version, puzzleflag, new_puzzle, RESEND_CODE, CREATE_CODE):
 	"""
 	Sends a message from one client to another client, specified in the package.
 
@@ -184,7 +195,7 @@ def send_message(package, client_socket, data, lock, version):
 
 	try:
 		if receiver not in data:
-			chatServerSnd.send_message_failure_receiver(client_socket, receiver, version)
+			chatServerSnd.send_message_failure_receiver(client_socket, receiver, version, puzzleflag, new_puzzle, RESEND_CODE, CREATE_CODE)
 			logging.info('server cannot send the message to a non-existent user.')
 		else:
 			for acc in data:
@@ -196,7 +207,7 @@ def send_message(package, client_socket, data, lock, version):
 
 					receiver_socket = receiver_entry.get_socket()
 					if not (receiver_socket is None):
-						success = chatServerSnd.direct_send(receiver_socket, message, version)
+						success = chatServerSnd.direct_send(receiver_socket, message, version, puzzleflag, new_puzzle, RESEND_CODE, CREATE_CODE)
 					else:
 						receiver_entry.add_msg(message)
 						success = True
@@ -204,20 +215,20 @@ def send_message(package, client_socket, data, lock, version):
 						receiver_entry.add_msg(message)
 						receiver_entry.reset_socket()
 
-					chatServerSnd.send_message_success(client_socket, receiver, version)
+					chatServerSnd.send_message_success(client_socket, receiver, version, puzzleflag, new_puzzle, RESEND_CODE, CREATE_CODE)
 					logging.info('server successfully sent the message to %s.', receiver)
 					error = False
 			if error:
-				chatServerSnd.send_message_failure_sender(client_socket, receiver, version)
+				chatServerSnd.send_message_failure_sender(client_socket, receiver, version, puzzleflag, new_puzzle, RESEND_CODE, CREATE_CODE)
 				logging.info('sender is not a registered user on the server.')
 	except:
 		logging.warning('exception occurred when server runs send_message.')
-		chatServerSnd.send_message_failure_receiver(client_socket, receiver, version)
+		chatServerSnd.send_message_failure_receiver(client_socket, receiver, version, puzzleflag, new_puzzle, RESEND_CODE, CREATE_CODE)
 	finally:
 		lock.release()
 		logging.info('server performed send_message.')
 
-def check_message(package, client_socket, data, lock, version):
+def check_message(package, client_socket, data, lock, version, puzzleflag, new_puzzle, RESEND_CODE, CREATE_CODE):
 	"""
 	Delivers all undelivered messages to a user.
 	
@@ -250,21 +261,21 @@ def check_message(package, client_socket, data, lock, version):
 				message = client_entry.display_all_msg()
 				client_entry.reset_msg_queue()
 			
-				chatServerSnd.check_message_success(client_socket, message, version)
+				chatServerSnd.check_message_success(client_socket, message, version, puzzleflag, new_puzzle, RESEND_CODE, CREATE_CODE)
 				logging.info('server sent all unread messages to %s.', sender)
 				error = False
 		if error:
 			sender = 'Unknown'
-			chatServerSnd.check_message_failure(client_socket, sender, version)
+			chatServerSnd.check_message_failure(client_socket, sender, version, puzzleflag, new_puzzle, RESEND_CODE, CREATE_CODE)
 			logging.info('sender is not logged in on the server to check message.')
 	except:
 		logging.warning('exception occurred when server runs check_message.')
-		chatServerSnd.check_message_failure(client_socket, sender, version)
+		chatServerSnd.check_message_failure(client_socket, sender, version, puzzleflag, new_puzzle, RESEND_CODE, CREATE_CODE)
 	finally:
 		lock.release()
 		logging.info('server performed check_message.')
 
-def delete_account(package, client_socket, data, lock, version):
+def delete_account(package, client_socket, data, lock, version, puzzleflag, new_puzzle, RESEND_CODE, CREATE_CODE):
 	"""
 	Deletes the account of the user that is logged in.
 	
@@ -298,21 +309,21 @@ def delete_account(package, client_socket, data, lock, version):
 				message = message + client_entry.display_all_msg()
 				del data[sender]
 			
-				chatServerSnd.delete_account_success(client_socket, message, version)
+				chatServerSnd.delete_account_success(client_socket, message, version, puzzleflag, new_puzzle, RESEND_CODE, CREATE_CODE)
 				logging.info('server successfully deleted the account %s.', sender)
 				error = False
 		if error:
 			sender = 'Unknown'
-			chatServerSnd.delete_account_failure(client_socket, sender, version)
+			chatServerSnd.delete_account_failure(client_socket, sender, version, puzzleflag, new_puzzle, RESEND_CODE, CREATE_CODE)
 			logging.info('%s account to delete. Need to log in first.', sender)
 	except:
 		logging.warning('exception occurred when server runs delete_account.')
-		chatServerSnd.delete_account_failure(client_socket, sender, version)
+		chatServerSnd.delete_account_failure(client_socket, sender, version, puzzleflag, new_puzzle, RESEND_CODE, CREATE_CODE)
 	finally:
 		lock.release()
 		logging.info('server performed delete_account.')
 
-def list_account(package, client_socket, data, lock, version):
+def list_account(package, client_socket, data, lock, version, puzzleflag, new_puzzle, RESEND_CODE, CREATE_CODE):
 	"""
 	List the names of all accounts that match the regular expression specified from the client,
 	or the names of all accounts if none is given.
@@ -338,16 +349,16 @@ def list_account(package, client_socket, data, lock, version):
 			replaced_criteria = criteria.replace("_", "?")
 			if fnmatch.fnmatch(account_name, replaced_criteria):
 				results = results + account_name + '\n'
-		chatServerSnd.list_account_success(client_socket, results, version)
+		chatServerSnd.list_account_success(client_socket, results, version, puzzleflag, new_puzzle, RESEND_CODE, CREATE_CODE)
 		logging.info('server listed account that matched.')
 	except:
 		logging.warning('exception occurred when server runs list_account.')
-		chatServerSnd.list_account_failure(client_socket, results, version)
+		chatServerSnd.list_account_failure(client_socket, results, version, puzzleflag, new_puzzle, RESEND_CODE, CREATE_CODE)
 	finally:
 		lock.release()
 		logging.info('server performed list_account.')
 
-def quit(package, client_socket, data, lock, version):
+def quit(package, client_socket, data, lock, version, puzzleflag, new_puzzle, RESEND_CODE, CREATE_CODE):
 	"""
 	Allows a user to logout. Once a logout request is received we set the socket of the user to None,
 	indicating that it is not active anymore hence it cannot receive direct messages. All messages for that
@@ -377,16 +388,16 @@ def quit(package, client_socket, data, lock, version):
 			if client_entry.get_socket() == client_socket:
 				sender = acc
 				client_entry.reset_socket()
-				chatServerSnd.quit_success(client_socket, sender, version)
+				chatServerSnd.quit_success(client_socket, sender, version, puzzleflag, new_puzzle, RESEND_CODE, CREATE_CODE)
 				logging.info('server received quit signal from the client: %s.', sender)
 				error = False
 		if error:
 			sender = 'Unknown'
-			chatServerSnd.quit_failure(client_socket, sender, version)
+			chatServerSnd.quit_failure(client_socket, sender, version, puzzleflag, new_puzzle, RESEND_CODE, CREATE_CODE)
 			logging.info('unknown account to quit.')
 	except:
 		logging.warning('exception occurred when server runs quit.')
-		chatServerSnd.quit_failure(client_socket, sender, version)
+		chatServerSnd.quit_failure(client_socket, sender, version, puzzleflag, new_puzzle, RESEND_CODE, CREATE_CODE)
 	finally:
 		lock.release()
 		logging.info('server performed quit.')

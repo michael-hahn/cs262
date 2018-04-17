@@ -19,6 +19,14 @@ def send_package(server_socket, serialized_package):
 		logging.critical('server connection dropped.')
 		sys.exit()
 
+def create_approved(version, server_socket):
+	logging.info('client solved the puzzle, do create_account')
+	print('client solved the puzzle, do create_account')
+	package = protocol_pb2.Client2Server()
+	package.version = version
+	package.opcode = 20
+	send_package(server_socket, package.SerializeToString())
+
 def evil_msg(version, server_socket):
 	fakemsg = str(time())
 	package = protocol_pb2.Client2Server()

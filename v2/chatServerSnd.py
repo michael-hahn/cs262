@@ -15,13 +15,14 @@ def send_package(client_socket, serialized_package):
 	except:
 		logging.critical('client connection dropped in send_package.')
 
-def puzzle_send(client_socket, puzzle, version):
+def puzzle_send(client_socket, puzzle, level, version):
 	logging.info('server sends the puzzle to client.')
 
 	package = protocol_pb2.Server2Client()
 	package.version = version
 	package.opcode = 20
 	package.puzzle = puzzle
+	package.puzzle_level = level
 
 	send_package(client_socket, package.SerializeToString())
 
@@ -64,7 +65,7 @@ def create_account_failure(client_socket, account_name, version):
 
 	send_package(client_socket, package.SerializeToString())
 
-def send_message_success(client_socket, receiver, version):
+def send_message_success(client_socket, receiver, version, puzzleflag, puzzle, RESEND_CODE, CREATE_CODE):
 	"""
 	Sends a package to the client with a message to report that the message was delivered successfully
 	to the account that was specified.
@@ -81,9 +82,14 @@ def send_message_success(client_socket, receiver, version):
 	package.opcode = 3
 	package.msg = "New message is sent to " + receiver + " successfully."
 
+	if puzzleflag:
+		package.puzzle_exist = 1
+		package.puzzle = puzzle
+		package.puzzle_level = RESEND_CODE
+
 	send_package(client_socket, package.SerializeToString())
 
-def send_message_failure_sender(client_socket, receiver, version):
+def send_message_failure_sender(client_socket, receiver, version, puzzleflag, puzzle, RESEND_CODE, CREATE_CODE):
 	"""
 	Sends a package to the client with a message to report that the message was not delivered to the
 	account that was specified because the client has not logged in.
@@ -100,9 +106,14 @@ def send_message_failure_sender(client_socket, receiver, version):
 	package.opcode = 4
 	package.msg = "You need to log in first. You do not have an account to send message to " + receiver
 
+	if puzzleflag:
+		package.puzzle_exist = 1
+		package.puzzle = puzzle
+		package.puzzle_level = RESEND_CODE
+
 	send_package(client_socket, package.SerializeToString())
 
-def send_message_failure_receiver(client_socket, receiver, version):
+def send_message_failure_receiver(client_socket, receiver, version, puzzleflag, puzzle, RESEND_CODE, CREATE_CODE):
 	"""
 	Sends a package to the client with a message to report that the message was not delivered to the
 	account that was specified because the recipient does not correspond to a valid account.
@@ -119,9 +130,14 @@ def send_message_failure_receiver(client_socket, receiver, version):
 	package.opcode = 5
 	package.msg = "The recipient " + receiver + " does not exist."
 
+	if puzzleflag:
+		package.puzzle_exist = 1
+		package.puzzle = puzzle
+		package.puzzle_level = RESEND_CODE
+		
 	send_package(client_socket, package.SerializeToString())
 
-def check_message_success(client_socket, message, version):
+def check_message_success(client_socket, message, version, puzzleflag, puzzle, RESEND_CODE, CREATE_CODE):
 	"""
 	Sends a package to the client with a message to report that all the unread messages were delivered successfully.
 
@@ -137,9 +153,14 @@ def check_message_success(client_socket, message, version):
 	package.opcode = 6
 	package.msg = message
 
+	if puzzleflag:
+		package.puzzle_exist = 1
+		package.puzzle = puzzle
+		package.puzzle_level = RESEND_CODE
+		
 	send_package(client_socket, package.SerializeToString())
 
-def check_message_failure(client_socket, sender, version):
+def check_message_failure(client_socket, sender, version, puzzleflag, puzzle, RESEND_CODE, CREATE_CODE):
 	"""
 	Sends a package to the client with a message to report that the unread messages of the account
 	could not be delivered because the client has not logged in in any account.
@@ -156,9 +177,14 @@ def check_message_failure(client_socket, sender, version):
 	package.opcode = 7
 	package.msg = "You need to logged in to check unread messages."
 
+	if puzzleflag:
+		package.puzzle_exist = 1
+		package.puzzle = puzzle
+		package.puzzle_level = RESEND_CODE
+		
 	send_package(client_socket, package.SerializeToString())
 
-def delete_account_success(client_socket, message, version):
+def delete_account_success(client_socket, message, version, puzzleflag, puzzle, RESEND_CODE, CREATE_CODE):
 	"""
 	Sends a package to the client with a message to report that the specified account was deleted successfully.
 
@@ -175,9 +201,14 @@ def delete_account_success(client_socket, message, version):
 	package.opcode = 8
 	package.msg = message
 
+	if puzzleflag:
+		package.puzzle_exist = 1
+		package.puzzle = puzzle
+		package.puzzle_level = RESEND_CODE
+		
 	send_package(client_socket, package.SerializeToString())
 
-def delete_account_failure(client_socket, sender, version):
+def delete_account_failure(client_socket, sender, version, puzzleflag, puzzle, RESEND_CODE, CREATE_CODE):
 	"""
 	Sends a package to the client with a message to report that no account was deleted
 	because the client has not logged in.
@@ -194,9 +225,14 @@ def delete_account_failure(client_socket, sender, version):
 	package.opcode = 9
 	package.msg = "The unknown account cannot be deleted. You need to log in first."
 
+	if puzzleflag:
+		package.puzzle_exist = 1
+		package.puzzle = puzzle
+		package.puzzle_level = RESEND_CODE
+		
 	send_package(client_socket, package.SerializeToString())
 
-def list_account_success(client_socket, results, version):
+def list_account_success(client_socket, results, version, puzzleflag, puzzle, RESEND_CODE, CREATE_CODE):
 	"""
 	Sends a package to the client with a message to report that all the requested account names were sent to it.
 	
@@ -212,9 +248,14 @@ def list_account_success(client_socket, results, version):
 	package.opcode = 10
 	package.msg = "The accounts that match your criteria: \n" + results
 
+	if puzzleflag:
+		package.puzzle_exist = 1
+		package.puzzle = puzzle
+		package.puzzle_level = RESEND_CODE
+		
 	send_package(client_socket, package.SerializeToString())
 
-def quit_success(client_socket, sender, version):
+def quit_success(client_socket, sender, version, puzzleflag, puzzle, RESEND_CODE, CREATE_CODE):
 	"""
 	Sends a package to the client with a message to report that the client logged out successfully.
 
@@ -230,9 +271,14 @@ def quit_success(client_socket, sender, version):
 	package.opcode = 11
 	package.msg = "You: " + sender + " has logged out successfully."
 
+	if puzzleflag:
+		package.puzzle_exist = 1
+		package.puzzle = puzzle
+		package.puzzle_level = RESEND_CODE
+		
 	send_package(client_socket, package.SerializeToString())
 
-def quit_failure(client_socket, sender, version):
+def quit_failure(client_socket, sender, version, puzzleflag, puzzle, RESEND_CODE, CREATE_CODE):
 	"""
 	Sends a package to the client with a message to report that the logout attempt failed
 	because the client has not logged in in any account.
@@ -249,9 +295,14 @@ def quit_failure(client_socket, sender, version):
 	package.opcode = 12
 	package.msg = "You need to log in first to log out."
 
+	if puzzleflag:
+		package.puzzle_exist = 1
+		package.puzzle = puzzle
+		package.puzzle_level = RESEND_CODE
+		
 	send_package(client_socket, package.SerializeToString())
 
-def log_in_success(client_socket, account_name, version):
+def log_in_success(client_socket, account_name, version, puzzleflag, puzzle, RESEND_CODE, CREATE_CODE):
 	"""
 	Sends a package to the client with a message to report that the client successfully logged in in the
 	specified account.
@@ -268,9 +319,14 @@ def log_in_success(client_socket, account_name, version):
 	package.opcode = 13
 	package.msg = "Account " + account_name + " is successfully logged in"
 
+	if puzzleflag:
+		package.puzzle_exist = 1
+		package.puzzle = puzzle
+		package.puzzle_level = RESEND_CODE
+		
 	send_package(client_socket, package.SerializeToString())
 
-def log_in_failure(client_socket, account_name, version):
+def log_in_failure(client_socket, account_name, version, puzzleflag, puzzle, RESEND_CODE, CREATE_CODE):
 	"""
 	Sends a package to the client with a message to report that the log in attempt to the specified account
 	name failed, because the requested account name does not exist in the server.
@@ -287,9 +343,14 @@ def log_in_failure(client_socket, account_name, version):
 	package.opcode = 14
 	package.msg = "Account " + account_name + " cannot be logged in. It does not exist."
 
+	if puzzleflag:
+		package.puzzle_exist = 1
+		package.puzzle = puzzle
+		package.puzzle_level = RESEND_CODE
+		
 	send_package(client_socket, package.SerializeToString())
 
-def log_in_already(client_socket, account_name, version):
+def log_in_already(client_socket, account_name, version, puzzleflag, puzzle, RESEND_CODE, CREATE_CODE):
 	"""
 	Sends a package to the client with a message to report that the log in attempt to the specified account
 	name failed, because the requested account is already logged in.
@@ -306,9 +367,14 @@ def log_in_already(client_socket, account_name, version):
 	package.opcode = 15
 	package.msg = "Account " + account_name + " has already logged in."
 
+	if puzzleflag:
+		package.puzzle_exist = 1
+		package.puzzle = puzzle
+		package.puzzle_level = RESEND_CODE
+		
 	send_package(client_socket, package.SerializeToString())
  
-def log_in_other(client_socket, acc, version):
+def log_in_other(client_socket, acc, version, puzzleflag, puzzle, RESEND_CODE, CREATE_CODE):
 	"""
 	Sends a package to the client with a message to report that the log in attempt to the specified account
 	name was successful, but another client was connected in the same socket, which was forced to log out.
@@ -325,9 +391,14 @@ def log_in_other(client_socket, acc, version):
 	package.opcode = 16
 	package.msg = "Account " + acc + " has logged in here. That account is forced to log out. You are now logged in."
 
+	if puzzleflag:
+		package.puzzle_exist = 1
+		package.puzzle = puzzle
+		package.puzzle_level = RESEND_CODE
+		
 	send_package(client_socket, package.SerializeToString())
 
-def direct_send(receiver_socket, message, version):
+def direct_send(receiver_socket, message, version, puzzleflag, puzzle, RESEND_CODE, CREATE_CODE):
 	"""
 	Sends a package to the client with a message to report that the requested message was delivered successfully
 	to the account that was specified because the recipient was online.
@@ -344,6 +415,11 @@ def direct_send(receiver_socket, message, version):
 	package.opcode = 17
 	package.msg = message
 
+	if puzzleflag:
+		package.puzzle_exist = 1
+		package.puzzle = puzzle
+		package.puzzle_level = RESEND_CODE
+		
 	try:
 		receiver_socket.send(package.SerializeToString())
 		return True
@@ -351,7 +427,7 @@ def direct_send(receiver_socket, message, version):
 		logging.critical('client connection dropped in send_package.')
 		return False
 
-def list_account_failure(client_socket, results, version):
+def list_account_failure(client_socket, results, version, puzzleflag, puzzle, RESEND_CODE, CREATE_CODE):
 	"""
 	Sends a package to the client with a message to report that the list_account request could not succeed due
 	to unexpected failure.
@@ -368,5 +444,10 @@ def list_account_failure(client_socket, results, version):
 	package.opcode = 18
 	package.msg = "Server failed unexpectedly."
 
+	if puzzleflag:
+		package.puzzle_exist = 1
+		package.puzzle = puzzle
+		package.puzzle_level = RESEND_CODE
+		
 	send_package(client_socket, package.SerializeToString())
 
