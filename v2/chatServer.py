@@ -79,7 +79,7 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
 					puzzleflag = 1 # now we need to send a puzzle with the response to the client later
 					resend_counter = 0 # restart every counter
 				if puzzleflag == 1:
-					print("Send puzzle again...")
+					print("SEND PUZZLE AGAIN...")
 					#############################################
 					new_puzzle = puzzle.create_puzzle(RESEND_CODE)
 					#############################################

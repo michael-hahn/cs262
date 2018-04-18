@@ -21,7 +21,7 @@ def send_package(server_socket, serialized_package):
 
 def create_approved(version, server_socket):
 	logging.info('client solved the puzzle, do create_account')
-	print('client solved the puzzle, do create_account')
+	# print('client solved the puzzle, do create_account')
 	package = protocol_pb2.Client2Server()
 	package.version = version
 	package.opcode = 20

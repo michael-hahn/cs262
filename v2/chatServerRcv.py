@@ -73,7 +73,7 @@ def create_account(package, client_socket, data, lock, version, puzzleflag, new_
 		Nothing
 	
 	"""
-	print("start create_account")
+	# print("start create_account")
 	account_name = package.msg    # the msg in the package contains the name of the new account
 
 	# import pdb; pdb.set_trace()
@@ -100,7 +100,7 @@ def create_account(package, client_socket, data, lock, version, puzzleflag, new_
 		chatServerSnd.create_account_failure(client_socket, account_name, version)
 	finally:
 		lock.release()
-		print("end create_account")
+		# print("end create_account")
 		logging.info('server performed create_account.')
 
 def log_in(package, client_socket, data, lock, version, puzzleflag, new_puzzle, RESEND_CODE, CREATE_CODE):

@@ -135,7 +135,7 @@ def get_response(server_socket):
 				if package.opcode == 20:
 					print ("SOLVE PUZZLE NOW...")
 					puzzle.solve_puzzle(package.puzzle_level, package.puzzle)
-					print ("SOLVED...")
+					print ("PUZZLE SOLVED...")
 					# import pdb; pdb.set_trace()
 					if package.puzzle_level == CREATE_CODE:
 						### response something here
@@ -153,7 +153,7 @@ def get_response(server_socket):
 						OPCODES[package.opcode](server_socket, package.msg)
 						if package.puzzle_exist:
 							t.join()
-							print ("SOLVED...")
+							print ("PUZZLE SOLVED...")
 						return
 					except:
 						logging.critical('unexpected fatal error occurred. Check client get_response.')
@@ -203,30 +203,44 @@ if __name__ == '__main__':
 
 	while True:
 		try:
-			print """
-				Connected to the chat server. Please enter the index to execute a function:
-				(1) Create an account
-				(2) Log in
-				(3) Send a message
-				(4) Checked unread message
-				(5) Delete an account
-				(6) List accounts
-				(7) Quit
-				"""
-			sys.stdout.write(">> ")
-			sys.stdout.flush()
-
+			
 			listen_from = [server_socket, sys.stdin]
 			reads, writes, err = select.select(listen_from, [], [])
 
 			for src in reads:
 				if src == server_socket:
 					get_response(server_socket)
+					print """
+Connected to the chat server. Please enter the index to execute a function:
+	(1) Create an account
+	(2) Log in
+	(3) Send a message
+	(4) Checked unread message
+	(5) Delete an account
+	(6) List accounts
+	(7) Quit
+						"""
+					sys.stdout.write(">> ")
+					sys.stdout.flush()
+
 				else:
 					client_action = sys.stdin.readline().strip("\n")
 					# client_action = client_input()
 					interpret_input(client_action, server_socket)
 					get_response(server_socket)
+					print """
+Connected to the chat server. Please enter the index to execute a function:
+	(1) Create an account
+	(2) Log in
+	(3) Send a message
+	(4) Checked unread message
+	(5) Delete an account
+	(6) List accounts
+	(7) Quit
+						"""
+					sys.stdout.write(">> ")
+					sys.stdout.flush()
+
 					
 		except:
 			chatClientSnd.inform_dead(VERSION, server_socket)
