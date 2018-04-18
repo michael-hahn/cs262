@@ -7,6 +7,7 @@ import chatClientRcv
 import select
 from time import gmtime, strftime
 import puzzle
+from threading import Thread
 
 VERSION = '0.1'
 RESEND_CODE = 22
@@ -142,11 +143,17 @@ def get_response(server_socket):
 					return
 				else:
 					if package.puzzle_exist:
+						# print ("SOLVE PUZZLE NOW...")
+						# puzzle.solve_puzzle(package.puzzle_level, package.puzzle)
+						# print ("SOLVED...")
 						print ("SOLVE PUZZLE NOW...")
-						puzzle.solve_puzzle(package.puzzle_level, package.puzzle)
-						print ("SOLVED...")
+						t = Thread(target=puzzle.solve_puzzle, args=(package.puzzle_level, package.puzzle, ))
+						t.start()
 					try:
 						OPCODES[package.opcode](server_socket, package.msg)
+						if package.puzzle_exist:
+							t.join()
+							print ("SOLVED...")
 						return
 					except:
 						logging.critical('unexpected fatal error occurred. Check client get_response.')

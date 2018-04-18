@@ -59,32 +59,7 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
 		##### Send package to client.
 		chatServerSnd.puzzle_send(self.request, new_puzzle, RESEND_CODE, VERSION)
 		#########################
-
-		# # receive package
-		# self.message = self.request.recv(1024)
-		# if len(self.message) == 0:
-		# 	print("Check The Issue Here.")
-		# 	raise KeyboardInterrupt
-
-		# package = protocol_pb2.Client2Server()
-		# package.ParseFromString(self.message)
-
-		# # check the package see if the puzzle is solved.
-		# if package.opcode != 9:
-		# 	# blacklist
-		# 	###############################
-		# 	blackflag = 0
-		# else:
-		# 	# check the result, res is boolean
-		# 	res = chatServerRcv.puzzle_check(package, self.request, self.server.data, self.server.lock, VERSION, puzzle)
-		# 	if res:
-		# 		# whitelist
-		# 		self.server.whitelist[client_addr] = socket_counter(puzzle)
-		# 	else:
-		# 		#add client address to blacklist
-		# 		#################################
-		# 		blackflag = 0
-
+		
 		# first validation is done
 		while True:
 			try:
