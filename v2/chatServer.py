@@ -12,8 +12,8 @@ import protocol_pb2
 
 VERSION = '0.1'
 MAX_RESEND = 5
-RESEND_CODE = 22
-CREATE_CODE = 23
+RESEND_CODE = 15
+CREATE_CODE = 16
 
 """
 Operation codes found in the packages from the client to the server.
