@@ -28,12 +28,12 @@ def create_approved(version, server_socket):
 	send_package(server_socket, package.SerializeToString())
 
 def evil_msg(version, server_socket):
-	fakemsg = str(time())
+	# fakemsg = str(time())
 	package = protocol_pb2.Client2Server()
 	package.version = version
-	package.opcode = 1
+	package.opcode = 4
 
-	package.msg = fakemsg
+	# package.msg = fakemsg
 	send_package(server_socket, package.SerializeToString())
 
 
