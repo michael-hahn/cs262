@@ -12,8 +12,8 @@ import protocol_pb2
 
 VERSION = '0.1'
 MAX_RESEND = 5
-RESEND_CODE = 15
-CREATE_CODE = 16
+RESEND_CODE = 21
+CREATE_CODE = 22
 
 """
 Operation codes found in the packages from the client to the server.
@@ -75,6 +75,7 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
 				if package.opcode == 0:	   # in some case an empty package may be sent
 					continue
 
+				print("Server: received a message from " + str(client_addr))
 				if resend_counter > MAX_RESEND:
 					puzzleflag = 1 # now we need to send a puzzle with the response to the client later
 					resend_counter = 0 # restart every counter
