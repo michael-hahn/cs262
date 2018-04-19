@@ -18,6 +18,15 @@ def send_package(server_socket, serialized_package):
 		logging.critical('server connection dropped.')
 		sys.exit()
 
+def evil_msg(version, server_socket):
+	# fakemsg = str(time())
+	package = protocol_pb2.Client2Server()
+	package.version = version
+	package.opcode = 4
+
+	# package.msg = fakemsg
+	send_package(server_socket, package.SerializeToString())
+	
 def create_account(version, server_socket):
 	"""
 	This function is responsible for sending a package to the server with the message to create
