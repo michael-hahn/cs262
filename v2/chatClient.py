@@ -11,7 +11,7 @@ from threading import Thread
 
 VERSION = '0.1'
 RESEND_CODE = 21
-CREATE_CODE = 22
+CREATE_CODE = 15
 
 """
 Operation codes found in the packages from the server to the client.
