@@ -141,7 +141,7 @@ def get_response(server_socket):
 					if package.puzzle_level == CREATE_CODE:
 						### response something here
 						chatClientSnd.create_approved(VERSION, server_socket)
-					return
+					return end_time
 				else:
 					if package.puzzle_exist:
 						# print ("SOLVE PUZZLE NOW...")
@@ -155,7 +155,7 @@ def get_response(server_socket):
 						if package.puzzle_exist:
 							t.join()
 							print ("PUZZLE SOLVED...")
-						return
+						return end_time
 					except:
 						logging.critical('unexpected fatal error occurred. Check client get_response.')
 						sys.exit()
