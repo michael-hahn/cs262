@@ -5,7 +5,7 @@ import protocol_pb2
 import chatClientSnd
 import chatClientRcv
 import select
-from time import gmtime, strftime
+from time import gmtime, strftime, time
 
 VERSION = '0.1'
 
@@ -121,13 +121,14 @@ def get_response(server_socket):
 			sys.exit()
 
 		if len(buf) != 0:
+			end_time = time()
 			package = protocol_pb2.Server2Client()
 			package.ParseFromString(buf)
 
 			if package.version == VERSION:
 				try:
 					OPCODES[package.opcode](server_socket, package.msg)
-					return
+					return end_time
 				except:
 					logging.critical('unexpected fatal error occurred. Check client get_response.')
 					sys.exit()
@@ -138,6 +139,16 @@ def get_response(server_socket):
 			logging.critical('connection to server lost at get_response')
 			print "Server is down."
 			sys.exit()
+
+def open_time():
+	file = open("result.txt", "w")
+	return
+
+def write_time(period, period2):
+	myfile = open("result.txt", "a")
+	myfile.write("start-response time: \t" + str(period) + "\n")
+	myfile.write("start-endprint time: \t" + str(period2) + "\n")
+	myfile.close()
 
 if __name__ == '__main__':
 	"""
@@ -174,6 +185,7 @@ if __name__ == '__main__':
 		print "FATAL: Connection to " + server_host + ":" + server_port + " failed."
 		sys.exit()
 
+	open_time()
 	while True:
 		try:
 			print """
@@ -199,7 +211,12 @@ if __name__ == '__main__':
 					client_action = sys.stdin.readline().strip("\n")
 					# client_action = client_input()
 					interpret_input(client_action, server_socket)
-					get_response(server_socket)
+					start_time = time()
+					res_time = get_response(server_socket)
+					stop_time = time()
+					period = res_time - start_time
+					period2 = stop_time - start_time
+					write_time(period, period2)
 					
 		except:
 			chatClientSnd.inform_dead(VERSION, server_socket)

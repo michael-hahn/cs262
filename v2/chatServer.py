@@ -51,6 +51,8 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
 		client_addr = self.client_address
 		logging.info('client connected from: %s', client_addr)
 
+		print("Server: client connected from " + str(client_addr))
+
 		resend_counter = 0 # count for the conversation
 		puzzleflag = 0 # if 1 then the server should send the puzzle again, 0 then not
 		# send first puzzle to validate

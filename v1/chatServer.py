@@ -45,6 +45,8 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
 		client_addr = self.client_address
 		logging.info('client connected from: %s', client_addr)
 
+		print("Server: client connected from " + str(client_addr))
+
 		too_many_attempts = 0	# only allow limited mistakes from the client
 
 		while True:
@@ -61,6 +63,7 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
 				if package.opcode == 0:	   # in some case an empty package may be sent
 					continue
 
+				print("Server: received a message from " + str(client_addr))
 				if package.version == VERSION:
 					try:
 						OPCODES[package.opcode](package, self.request, self.server.data, self.server.lock, VERSION)

@@ -5,7 +5,7 @@ import protocol_pb2
 import chatClientSnd
 import chatClientRcv
 import select
-from time import gmtime, strftime
+from time import gmtime, strftime, time
 import puzzle
 from threading import Thread
 
@@ -128,6 +128,7 @@ def get_response(server_socket):
 			sys.exit()
 
 		if len(buf) != 0:
+			end_time = time()
 			package = protocol_pb2.Server2Client()
 			package.ParseFromString(buf)
 
@@ -166,6 +167,16 @@ def get_response(server_socket):
 			print "Server is down."
 			sys.exit()
 
+def open_time():
+	file = open("result.txt", "w")
+	return
+
+def write_time(period, period2):
+	myfile = open("result.txt", "a")
+	myfile.write("start-response time: \t" + str(period) + "\n")
+	myfile.write("start-endprint time: \t" + str(period2) + "\n")
+	myfile.close()
+	
 if __name__ == '__main__':
 	"""
 	This function starts a new client. It takes exactly 2 command line arguements that specify the location
@@ -201,6 +212,7 @@ if __name__ == '__main__':
 		print "FATAL: Connection to " + server_host + ":" + server_port + " failed."
 		sys.exit()
 
+	open_time()
 	while True:
 		try:
 			
@@ -227,7 +239,12 @@ Connected to the chat server. Please enter the index to execute a function:
 					client_action = sys.stdin.readline().strip("\n")
 					# client_action = client_input()
 					interpret_input(client_action, server_socket)
-					get_response(server_socket)
+					start_time = time()
+					res_time = get_response(server_socket)
+					stop_time = time()
+					period = res_time - start_time
+					period2 = stop_time - start_time
+					write_time(period, period2)
 					print """
 Connected to the chat server. Please enter the index to execute a function:
 	(1) Create an account
