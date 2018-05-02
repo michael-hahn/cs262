@@ -1,0 +1,12 @@
+start-response time: 	0.633381843567
+start-endprint time: 	0.633729934692
+start-response time: 	0.680958032608
+start-endprint time: 	0.681154966354
+start-response time: 	0.617020130157
+start-endprint time: 	0.617333173752
+start-response time: 	0.661648035049
+start-endprint time: 	0.662095069885
+start-response time: 	0.637931108475
+start-endprint time: 	0.638293981552
+start-response time: 	0.619385004044
+start-endprint time: 	0.619719028473
