@@ -174,7 +174,7 @@ def open_time():
 def write_time(period, period2):
 	myfile = open("result.txt", "a")
 	myfile.write("start-response time: \t" + str(period) + "\n")
-	myfile.write("start-endprint time: \t" + str(period2) + "\n")
+	myfile.write("start-endpoint time: \t" + str(period2) + "\n")
 	myfile.close()
 	
 if __name__ == '__main__':
